@@ -1,5 +1,6 @@
 package com.flywithus.portal.service
 
+import com.flywithus.portal.configuration.ApplicationProperty
 import com.flywithus.portal.external.PaymentRestClient
 import com.flywithus.portal.model.Reservation
 import spock.lang.Specification
@@ -7,10 +8,12 @@ import spock.lang.Specification
 class RefundServiceTest extends Specification {
     RefundService refundService
     PaymentRestClient paymentRestClient
+    ApplicationProperty applicationProperty
 
     def setup() {
         paymentRestClient = Mock()
-        refundService = new RefundServiceImpl(paymentRestClient)
+        applicationProperty = new ApplicationProperty()
+        refundService = new RefundServiceImpl(paymentRestClient, applicationProperty)
     }
 
     def "should refund 25 percent of the reservation amount"() {
@@ -20,6 +23,7 @@ class RefundServiceTest extends Specification {
                     .id(id)
                     .amount(BigDecimal.valueOf(100))
                     .build()
+            applicationProperty.setRefundPercentage(25)
         when:
             refundService.refund(reservation)
         then:

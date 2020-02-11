@@ -1,5 +1,6 @@
 package com.flywithus.portal.service;
 
+import com.flywithus.portal.configuration.ApplicationProperty;
 import com.flywithus.portal.exception.ReservationCannotBeCanceledException;
 import com.flywithus.portal.exception.ReservationInvalidStatusException;
 import com.flywithus.portal.exception.ReservationNotFoundException;
@@ -18,6 +19,7 @@ import java.util.UUID;
 class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
     private final RefundService refundService;
+    private final ApplicationProperty applicationProperty;
 
     @Override
     public Reservation get(UUID id) {
@@ -39,7 +41,7 @@ class ReservationServiceImpl implements ReservationService {
             throw new ReservationInvalidStatusException();
         }
         LocalDate reservationDate = reservation.getDate().toLocalDate();
-        if (reservationDate.plusDays(5).isAfter(reservation.getFlightDate())) {
+        if (reservationDate.plusDays(applicationProperty.getCancelDays()).isAfter(reservation.getFlightDate())) {
             throw new ReservationCannotBeCanceledException();
         }
     }
