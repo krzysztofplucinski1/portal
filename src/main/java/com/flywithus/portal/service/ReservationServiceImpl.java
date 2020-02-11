@@ -37,7 +37,7 @@ class ReservationServiceImpl implements ReservationService {
             throw new ReservationInvalidStatusException();
         }
         LocalDate reservationDate = reservation.getDate().toLocalDate();
-        if (reservationDate.plusDays(5).isAfter(LocalDate.now())) {
+        if (reservationDate.plusDays(5).isAfter(reservation.getFlightDate())) {
             throw new ReservationCannotBeCanceledException();
         }
     }
