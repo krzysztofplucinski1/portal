@@ -1,5 +1,6 @@
 package com.flywithus.portal.repository;
 
+import com.flywithus.portal.mapper.ReservationMapper;
 import com.flywithus.portal.model.Reservation;
 import com.flywithus.portal.model.ReservationStatus;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +13,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class ReservationRepositoryImpl implements ReservationRepository {
     private final ReservationCrudRepository reservationCrudRepository;
+    private final ReservationMapper reservationMapper;
 
     @Override
     public Optional<Reservation> get(UUID id) {
-        return Optional.empty();
+        return reservationCrudRepository.findById(id)
+                .map(reservationMapper::map);
     }
 
     @Override
