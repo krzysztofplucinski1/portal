@@ -17,6 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
+    private final RefundService refundService;
 
     @Override
     public Reservation get(UUID id) {
@@ -30,6 +31,7 @@ class ReservationServiceImpl implements ReservationService {
         Reservation reservation = get(id);
         validate(reservation);
         reservationRepository.updateStatus(id, ReservationStatus.CANCELLED);
+        refundService.refund(reservation);
     }
 
     private void validate(Reservation reservation) {

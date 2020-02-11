@@ -1,8 +1,11 @@
-package com.flywithus.portal
+package com.flywithus.portal.resource
 
+import com.flywithus.portal.PortalApplication
+import com.flywithus.portal.external.PaymentRestClient
 import com.flywithus.portal.model.ReservationStatus
 import com.flywithus.portal.service.ReservationService
 import groovy.sql.Sql
+import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -25,6 +28,7 @@ class ReservationRestResourceIT extends Specification {
     @Autowired TestRestTemplate restTemplate
     @Autowired ReservationService reservationService
     @Autowired DataSource dataSource
+    @SpringBean PaymentRestClient paymentRestClient = Mock()
     @Shared UUID reservationId
 
     def setupSpec() {
@@ -52,6 +56,7 @@ class ReservationRestResourceIT extends Specification {
             response.statusCode == HttpStatus.NO_CONTENT
             def reservation = reservationService.get(reservationId)
             reservation.status == ReservationStatus.CANCELLED
+            1 * paymentRestClient.refund(reservationId, _ as BigDecimal)
     }
 
     def "should return error when try cancel reservation older than 5 days"() {
@@ -69,6 +74,7 @@ class ReservationRestResourceIT extends Specification {
             response.statusCode == HttpStatus.BAD_REQUEST
             def reservation = reservationService.get(reservationId)
             reservation.status == ReservationStatus.PAID
+            0 * paymentRestClient.refund(reservationId, _ as BigDecimal)
     }
 
     def "should return error when reservation not exist"() {
@@ -81,6 +87,7 @@ class ReservationRestResourceIT extends Specification {
 
         then:
             response.statusCode == HttpStatus.BAD_REQUEST
+            0 * paymentRestClient.refund(reservationId, _ as BigDecimal)
     }
 
     def "should return error when try cancel unpaid reservation"() {
@@ -98,6 +105,7 @@ class ReservationRestResourceIT extends Specification {
             response.statusCode == HttpStatus.BAD_REQUEST
             def reservation = reservationService.get(reservationId)
             reservation.status == ReservationStatus.NEW
+            0 * paymentRestClient.refund(reservationId, _ as BigDecimal)
     }
 
     def createReservation(ReservationStatus status = ReservationStatus.NEW, UUID flightId = UUID.randomUUID()) {
