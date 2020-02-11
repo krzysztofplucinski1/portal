@@ -10,6 +10,7 @@ Users
 |creation_date|timestamp|
 |modification_date|timestamp|
 |technical_user|byte|
+
 Reservations
 ---
 |id|UUID|
